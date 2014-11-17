@@ -145,7 +145,7 @@ static bool bmp_08_data_read ( ifstream &file_in, unsigned long int width, long 
   indexr = rarray;
   numbyte = 0;
 
-  for ( int  j = 0; j < abs ( height ); j++ ) 
+  for ( int  j = 0; j < abs( height ) ; j++ ) 
     {
       for ( unsigned int i = 0; i < width; i++ )
 	{

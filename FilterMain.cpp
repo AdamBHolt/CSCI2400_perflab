@@ -72,20 +72,17 @@ readFilter(string filename)
 {
   ifstream input(filename.c_str());
 
-  //Declare iterators outside of loops
-  int i, j;
-  //Declare value outside of loop
-  int value; 
-
   if ( ! input.bad() ) {
     int size = 0;
+    
     input >> size;
     Filter *filter = new Filter(size);
     int div;
     input >> div;
     filter -> setDivisor(div);
-    for (i=0; i < size; i++) {
-      for (j=0; j < size; j++) {
+    for (int i=0; i < size; i++) {
+      for (int j=0; j < size; j++) {
+	int value;
 	input >> value;
 	filter -> set(i,j,value);
       }
@@ -116,48 +113,41 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
 
   //Array to hold filter x, y values
   int filterXY[filterSize][filterSize];
-  int xy;
-
-  //Temporary accumulators
-  int temp1, temp2, temp3;
-
-  //Variables for value of each plane
-  int plane1Val, plane2Val, plane3Val;
 
   //Moved call to getDivisor out of loop
   int divisor = filter -> getDivisor();
 
-  //Declare variables outside of loops
-  int row, col, i, j;
-
-  //Temporary row and column variables
-  int r, c;
-
   //New loop to process x, y values outside of main loop
-  for(i = 0; i < filterSize; i++)
-    for(j = 0; j < filterSize; j++)
+  for(int i = 0; i < filterSize; i++)
+    for(int j = 0; j < filterSize; j++)
       filterXY[i][j] = filter -> get(i, j);
 
+    int plane1Val, plane2Val, plane3Val;
 
     //Switched order of variables from Stride-N^2 to Stride-1
     //Removed outer loop and processed each plane within the current structure
-    for(row = 1; row < inHeightM; row++) {
-      for(col = 1; col < inWidthM; col++) {
+    for(int row = 1; row < inHeightM; row++) {
+      for(int col = 1; col < inWidthM; col++) {
 
 	//Reinitialize plane values to 0
-	plane1Val = plane2Val = plane3Val = 0;
+	plane1Val = 0;
+	plane2Val = 0;
+	plane3Val = 0;
        
         //Switched order of variables from Stride-N to Stride-1
-	for (i = 0; i < filterSize; i++) {
+	for (int i = 0; i < filterSize; i++) {
 
 	  //Reinitialize temp variables to 0;
-	  temp1 = temp2 = temp3 = 0;
-	  for (j = 0; j < filterSize; j++) {
+	  int temp1 = 0;
+	  int temp2 = 0;
+	  int temp3 = 0;
+
+	  for (int j = 0; j < filterSize; j++) {
 	    
             //Initialize temporary variables to save calculation time
-	    xy = filterXY[i][j];
-	    r = row + i - 1;
-	    c = col + j - 1;
+	    int xy = filterXY[i][j];
+	    int r = row + i - 1;
+	    int c = col + j - 1;
 
 	    //Process each plane individually instead of looping 
 	    temp1 += input -> color[0][r][c] * xy;
@@ -171,7 +161,6 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
 	}
 
 	//Use local divisor variable instead of function call
-	//value = value / divisor;
 	//Do not calculate if divisor is 1
 	if(divisor != 1){
 	  plane1Val /= divisor;
