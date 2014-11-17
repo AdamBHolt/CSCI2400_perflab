@@ -103,12 +103,13 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
 
   cycStart = rdtscll();
 
+  //Create local variable instead of dereferenced memory 
   int inWidth = output -> width = input -> width;
   int inHeight = output -> height = input -> height;
    
-  //Create local variable instead of dereferenced memory 
-  //int inWidth = input -> width;
-  //int inHeight = input -> height;
+  //Calculate outside of loop 
+  int inWidthM = inWidth - 1;
+  int inHeightM = inHeight - 1;
 
   //Move call to getSize() outside of loop
   int filterSize = filter -> getSize();
@@ -140,8 +141,8 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
 
     //Switched order of variables from Stride-N^2 to Stride-1
     //Removed outer loop and processed each plane within the current structure
-    for(row = 1; row < inHeight - 1; row++) {
-      for(col = 1; col < inWidth - 1; col++) {
+    for(row = 1; row < inHeightM; row++) {
+      for(col = 1; col < inWidthM; col++) {
 
 	//Reinitialize plane values to 0
 	plane1Val = plane2Val = plane3Val = 0;
@@ -163,10 +164,10 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
 	    temp2 += input -> color[1][r][c] * xy; 
 	    temp3 += input -> color[2][r][c] * xy;
 	  }
-	    //Add temp values to plane values
-	    plane1Val += temp1;
-	    plane2Val += temp2;
-	    plane3Val += temp3;
+	  //Add temp values to plane values
+	  plane1Val += temp1;
+	  plane2Val += temp2;
+	  plane3Val += temp3;
 	}
 
 	//Use local divisor variable instead of function call
