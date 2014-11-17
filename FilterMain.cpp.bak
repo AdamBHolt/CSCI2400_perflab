@@ -159,7 +159,7 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
 	int temp9 = 0;
 
 	//Initialize row variable outside column loop	
-	int r = row + i - 1;
+	int r = row + i + 1;
 	int r2 = r + 1;
 
 	for (int j = 0; j < filterSize; j++) {
