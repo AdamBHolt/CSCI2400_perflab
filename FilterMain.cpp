@@ -130,8 +130,8 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
   //Switched order of variables from Stride-N^2 to Stride-1
   //Removed outer loop and processed each plane within the current structure
   //Step two rows and columns at a time to reduce iterations
-  for(int row = 1; row < inHeightM; row+=2) {
-    for(int col = 1; col < inWidthM; col+=2) {
+  for(int row = 1; row <= inHeightM; row+=2) {
+    for(int col = 1; col <= inWidthM; col+=2) {
 
       //Reinitialize plane values to 0
       plane1Val = 0;
@@ -161,6 +161,7 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
 	//Initialize row variable outside column loop	
 	int r = row + i + 1;
 	int r2 = r + 1;
+
 	for (int j = 0; j < filterSize; j++) {
 	   
           //Initialize temporary variables to save calculation time
