@@ -138,16 +138,19 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
       filterXY[i][j] = filter -> get(i, j);
 
 
-  //Switched order of variables from Stride-N^2 to Stride-1
-  //Removed outer loop and processed each plane within the current structure
+    //Switched order of variables from Stride-N^2 to Stride-1
+    //Removed outer loop and processed each plane within the current structure
     for(row = 1; row < inHeight - 1; row++) {
       for(col = 1; col < inWidth - 1; col++) {
 
+	//Reinitialize plane values to 0
 	plane1Val = plane2Val = plane3Val = 0;
        
-
         //Switched order of variables from Stride-N to Stride-1
 	for (i = 0; i < filterSize; i++) {
+
+	  //Reinitialize temp variables to 0;
+	  temp1 = temp2 = temp3 = 0;
 	  for (j = 0; j < filterSize; j++) {
 	    
             //Initialize temporary variables to save calculation time
@@ -156,33 +159,29 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
 	    c = col + j - 1;
 
 	    //Process each plane individually instead of looping 
-	    temp1 = input -> color[0][r][c] * xy;
-	    temp2 = input -> color[1][r][c] * xy; 
-	    temp3 = input -> color[2][r][c] * xy;
-	    
-	    //Add temp values to totals
+	    temp1 += input -> color[0][r][c] * xy;
+	    temp2 += input -> color[1][r][c] * xy; 
+	    temp3 += input -> color[2][r][c] * xy;
+	  }
+	    //Add temp values to plane values
 	    plane1Val += temp1;
 	    plane2Val += temp2;
 	    plane3Val += temp3;
-
-	  }
 	}
 
 	//Use local divisor variable instead of function call
 	//value = value / divisor;
 	//Do not calculate if divisor is 1
 	if(divisor != 1){
-	  plane1Val = plane1Val / divisor;
-          plane2Val = plane2Val / divisor;
-          plane3Val = plane3Val / divisor;
+	  plane1Val /= divisor;
+	  plane2Val /= divisor;
+	  plane3Val /= divisor;
         }
 
-	if ( plane1Val < 0 ) { plane1Val = 0;}
-	if ( plane1Val > 255 ) { plane1Val = 255; }
-	if ( plane2Val < 0 ) { plane2Val = 0; }
-	if ( plane2Val > 255 ) { plane2Val = 255; }
-	if ( plane3Val < 0 ) { plane3Val = 0; }
-	if ( plane3Val > 255 ) { plane3Val = 255; }
+	//Use nested conditionals instead of if statements
+	plane1Val = plane1Val < 0 ? 0 : plane1Val > 255 ? 255 : plane1Val;
+	plane2Val = plane2Val < 0 ? 0 : plane2Val > 255 ? 255 : plane2Val;
+	plane3Val = plane3Val < 0 ? 0 : plane3Val > 255 ? 255 : plane3Val;
 
 	output -> color[0][row][col] = plane1Val;
 	output -> color[1][row][col] = plane2Val;
