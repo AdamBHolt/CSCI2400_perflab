@@ -48,7 +48,7 @@ main(int argc, char **argv)
 
   //Initialize values outside of loops
   struct cs1300bmp *input = new struct cs1300bmp;
-  struct cs1300bmp *output = new struct cs1300bmp;
+  struct cs1300bmp *output = new struct cs1300bmp; 
  
   for (int inNum = 2; inNum < argc; inNum++) {
     string inputFilename = argv[inNum];
@@ -86,7 +86,6 @@ readFilter(string filename)
     filter -> setDivisor(div);
     for (i=0; i < size; i++) {
       for (j=0; j < size; j++) {
-	value;
 	input >> value;
 	filter -> set(i,j,value);
       }
@@ -104,12 +103,12 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
 
   cycStart = rdtscll();
 
-  output -> width = input -> width;
-  output -> height = input -> height;
+  int inWidth = output -> width = input -> width;
+  int inHeight = output -> height = input -> height;
    
   //Create local variable instead of dereferenced memory 
-  int inWidth = input -> width;
-  int inHeight = input -> height;
+  //int inWidth = input -> width;
+  //int inHeight = input -> height;
 
   //Move call to getSize() outside of loop
   int filterSize = filter -> getSize();
@@ -155,7 +154,8 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
 	    xy = filterXY[i][j];
 	    r = row + i - 1;
 	    c = col + j - 1;
- 
+
+	    //Process each plane individually instead of looping 
 	    temp1 = input -> color[0][r][c] * xy;
 	    temp2 = input -> color[1][r][c] * xy; 
 	    temp3 = input -> color[2][r][c] * xy;
