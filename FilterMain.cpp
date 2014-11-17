@@ -100,10 +100,10 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
 
   cycStart = rdtscll();
 
-  //Create local variable instead of dereferenced memory 
+  //Create local variables instead of dereferenced memory 
   int inWidth = output -> width = input -> width;
   int inHeight = output -> height = input -> height;
-   
+
   //Calculate outside of loop 
   int inWidthM = inWidth - 1;
   int inHeightM = inHeight - 1;
@@ -122,63 +122,113 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
     for(int j = 0; j < filterSize; j++)
       filterXY[i][j] = filter -> get(i, j);
 
-    int plane1Val, plane2Val, plane3Val;
+  //Values for each plane in the image
+  int plane1Val, plane2Val, plane3Val,
+      plane1Val2, plane2Val2, plane3Val2,
+      plane1Val3, plane2Val3, plane3Val3;
 
-    //Switched order of variables from Stride-N^2 to Stride-1
-    //Removed outer loop and processed each plane within the current structure
-    for(int row = 1; row < inHeightM; row++) {
-      for(int col = 1; col < inWidthM; col++) {
+  //Switched order of variables from Stride-N^2 to Stride-1
+  //Removed outer loop and processed each plane within the current structure
+  //Step two rows and columns at a time to reduce iterations
+  for(int row = 1; row < inHeightM; row+=2) {
+    for(int col = 1; col < inWidthM; col+=2) {
 
-	//Reinitialize plane values to 0
-	plane1Val = 0;
-	plane2Val = 0;
-	plane3Val = 0;
-       
-        //Switched order of variables from Stride-N to Stride-1
-	for (int i = 0; i < filterSize; i++) {
+      //Reinitialize plane values to 0
+      plane1Val = 0;
+      plane2Val = 0;
+      plane3Val = 0;
+      plane1Val2 = 0;
+      plane2Val2 = 0;
+      plane3Val2 = 0;
+      plane1Val3 = 0;
+      plane2Val3 = 0;
+      plane3Val3 = 0;      
+ 
+      //Switched order of variables from Stride-N to Stride-1
+      for (int i = 0; i < filterSize; i++) {
 
-	  //Reinitialize temp variables to 0;
-	  int temp1 = 0;
-	  int temp2 = 0;
-	  int temp3 = 0;
+ 	//Reinitialize temp variables to 0
+	int temp1 = 0;
+	int temp2 = 0;
+	int temp3 = 0;
+	int temp4 = 0;
+	int temp5 = 0;
+	int temp6 = 0;
+	int temp7 = 0;
+	int temp8 = 0;
+	int temp9 = 0;
 
-	  for (int j = 0; j < filterSize; j++) {
-	    
-            //Initialize temporary variables to save calculation time
-	    int xy = filterXY[i][j];
-	    int r = row + i - 1;
-	    int c = col + j - 1;
-
-	    //Process each plane individually instead of looping 
-	    temp1 += input -> color[0][r][c] * xy;
-	    temp2 += input -> color[1][r][c] * xy; 
-	    temp3 += input -> color[2][r][c] * xy;
-	  }
-	  //Add temp values to plane values
-	  plane1Val += temp1;
-	  plane2Val += temp2;
-	  plane3Val += temp3;
+	//Initialize row variable outside column loop	
+	int r = row + i + 1;
+	int r2 = r + 1;
+	for (int j = 0; j < filterSize; j++) {
+	   
+          //Initialize temporary variables to save calculation time
+	  int xy = filterXY[i][j];
+	  int c = col + j - 1;
+	  int c2 = c + 1;
+	  
+	  //Process each plane individually instead of looping 
+	  temp1 += input -> color[0][r][c] * xy;
+	  temp2 += input -> color[1][r][c] * xy; 
+	  temp3 += input -> color[2][r][c] * xy;
+	  temp4 += input -> color[0][r][c2] * xy;
+	  temp5 += input -> color[1][r][c2] * xy; 
+	  temp6 += input -> color[2][r][c2] * xy;
+	  temp7 += input -> color[0][r2][c] * xy;
+	  temp8 += input -> color[1][r2][c] * xy; 
+	  temp9 += input -> color[2][r2][c] * xy;
 	}
 
-	//Use local divisor variable instead of function call
-	//Do not calculate if divisor is 1
-	if(divisor != 1){
-	  plane1Val /= divisor;
-	  plane2Val /= divisor;
-	  plane3Val /= divisor;
-        }
-
-	//Use nested conditionals instead of if statements
-	plane1Val = plane1Val < 0 ? 0 : plane1Val > 255 ? 255 : plane1Val;
-	plane2Val = plane2Val < 0 ? 0 : plane2Val > 255 ? 255 : plane2Val;
-	plane3Val = plane3Val < 0 ? 0 : plane3Val > 255 ? 255 : plane3Val;
-
-	output -> color[0][row][col] = plane1Val;
-	output -> color[1][row][col] = plane2Val;
-	output -> color[2][row][col] = plane3Val;
-
+	//Add temp values to plane values
+	plane1Val += temp1;
+	plane2Val += temp2;
+	plane3Val += temp3;
+ 	plane1Val2 += temp4;
+	plane2Val2 += temp5;
+	plane3Val2 += temp6;
+  	plane1Val3 += temp7;
+	plane2Val3 += temp8;
+	plane3Val3 += temp9;
       }
+
+      //Use local divisor variable instead of function call
+      //Do not calculate if divisor is 1
+      if(divisor != 1){
+	plane1Val /= divisor;
+	plane2Val /= divisor;
+	plane3Val /= divisor;
+	plane1Val2 /= divisor;
+	plane2Val2 /= divisor;
+	plane3Val2 /= divisor;
+	plane1Val3 /= divisor;
+	plane2Val3 /= divisor;
+	plane3Val3 /= divisor;
+      }
+
+      //Use nested conditionals instead of if statements
+      plane1Val = plane1Val < 0 ? 0 : plane1Val > 255 ? 255 : plane1Val;
+      plane2Val = plane2Val < 0 ? 0 : plane2Val > 255 ? 255 : plane2Val;
+      plane3Val = plane3Val < 0 ? 0 : plane3Val > 255 ? 255 : plane3Val;
+      plane1Val2 = plane1Val2 < 0 ? 0 : plane1Val2 > 255 ? 255 : plane1Val2;
+      plane2Val2 = plane2Val2 < 0 ? 0 : plane2Val2 > 255 ? 255 : plane2Val2;
+      plane3Val2 = plane3Val2 < 0 ? 0 : plane3Val2 > 255 ? 255 : plane3Val2;
+      plane1Val3 = plane1Val3 < 0 ? 0 : plane1Val3 > 255 ? 255 : plane1Val3;
+      plane2Val3 = plane2Val3 < 0 ? 0 : plane2Val3 > 255 ? 255 : plane2Val3;
+      plane3Val3 = plane3Val3 < 0 ? 0 : plane3Val3 > 255 ? 255 : plane3Val3;
+
+      output -> color[0][row][col] = plane1Val;
+      output -> color[1][row][col] = plane2Val;
+      output -> color[2][row][col] = plane3Val;
+      output -> color[0][row][col+1] = plane1Val2;
+      output -> color[1][row][col+1] = plane2Val2;
+      output -> color[2][row][col+1] = plane3Val2;
+      output -> color[0][row+1][col] = plane1Val3;
+      output -> color[1][row+1][col] = plane2Val3;
+      output -> color[2][row+1][col] = plane3Val3;
+
     }
+  }
 
   cycStop = rdtscll();
   double diff = cycStop - cycStart;
