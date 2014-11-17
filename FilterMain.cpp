@@ -116,6 +116,7 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
 
   //Array to hold filter x, y values
   int filterXY[filterSize][filterSize];
+  int xy;
 
   //Temporary accumulators
   int temp1, temp2, temp3;
@@ -129,6 +130,9 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
   //Declare variables outside of loops
   int row, col, i, j;
 
+  //Temporary row and column variables
+  int r, c;
+
   //New loop to process x, y values outside of main loop
   for(i = 0; i < filterSize; i++)
     for(j = 0; j < filterSize; j++)
@@ -137,19 +141,24 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
 
   //Switched order of variables from Stride-N^2 to Stride-1
   //Removed outer loop and processed each plane within the current structure
-    for(row = 1; row < inHeight - 1 ; row = row + 1) {
-      for(col = 1; col < inWidth - 1; col = col + 1) {
+    for(row = 1; row < inHeight - 1; row++) {
+      for(col = 1; col < inWidth - 1; col++) {
 
 	plane1Val = plane2Val = plane3Val = 0;
        
+
         //Switched order of variables from Stride-N to Stride-1
-	for (i = 0; i < filterSize; i+=1) {
-	  for (j = 0; j < filterSize; j+=1) {
+	for (i = 0; i < filterSize; i++) {
+	  for (j = 0; j < filterSize; j++) {
 	    
-            //Set each temporary vairable - allows pipelining 
-	    temp1 = input -> color[0][row + i - 1][col + j - 1] * filterXY[i][j];
-	    temp2 = input -> color[1][row + i - 1][col + j - 1] * filterXY[i][j]; 
-	    temp3 = input -> color[2][row + i - 1][col + j - 1] * filterXY[i][j];
+            //Initialize temporary variables to save calculation time
+	    xy = filterXY[i][j];
+	    r = row + i - 1;
+	    c = col + j - 1;
+ 
+	    temp1 = input -> color[0][r][c] * xy;
+	    temp2 = input -> color[1][r][c] * xy; 
+	    temp3 = input -> color[2][r][c] * xy;
 	    
 	    //Add temp values to totals
 	    plane1Val += temp1;
