@@ -1,0 +1,22 @@
+
+bangcode.o:     file format elf32-i386
+
+
+Disassembly of section .text:
+
+00000000 <.text>:
+   0:	c7 05 00 d1 04 08 7b 	movl   $0x34b1d67b,0x804d100
+   7:	d6 b1 34 
+   a:	ff 35 1d 8c 04 08    	pushl  0x8048c1d
+  10:	c3                   	ret    
+
+bangcode.o:     file format elf32-i386
+
+
+Disassembly of section .text:
+
+00000000 <.text>:
+   0:	c7 05 00 d1 04 08 7b 	movl   $0x34b1d67b,0x804d100
+   7:	d6 b1 34 
+   a:	68 1d 8c 04 08       	push   $0x8048c1d
+   f:	c3                   	ret    

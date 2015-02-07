@@ -1,0 +1,1 @@
+SELECT store.NAME FROM store;
